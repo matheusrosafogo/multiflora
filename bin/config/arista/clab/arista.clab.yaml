@@ -1,0 +1,36 @@
+# Laboratório Containerlab "arista" — 4 x Arista cEOS ligados em fila:
+#   r1 --- r2 --- r3 --- r4
+# Os endpoints eth1/eth2 do contêiner correspondem a Ethernet1/Ethernet2 no EOS,
+# os mesmos nomes usados em data.yaml.
+# Deploy a partir do devcontainer: make exec TARGET=arista
+name: arista
+
+# Rede de gerência própria do laboratório (10.99.0.0/24), a mesma referenciada
+# pelos hosts do inventory.yaml.
+mgmt:
+  network: clab_mgmt_arista
+  ipv4-subnet: 10.99.0.0/24
+
+topology:
+  nodes:
+    r1:
+      kind: arista_ceos
+      image: ceos:4.32.0F
+      mgmt-ipv4: 10.99.0.2
+    r2:
+      kind: arista_ceos
+      image: ceos:4.32.0F
+      mgmt-ipv4: 10.99.0.3
+    r3:
+      kind: arista_ceos
+      image: ceos:4.32.0F
+      mgmt-ipv4: 10.99.0.4
+    r4:
+      kind: arista_ceos
+      image: ceos:4.32.0F
+      mgmt-ipv4: 10.99.0.5
+  links:
+    # fila: os nós intermediários usam a segunda interface para o vizinho seguinte
+    - endpoints: ["r1:eth1", "r2:eth1"]
+    - endpoints: ["r2:eth2", "r3:eth1"]
+    - endpoints: ["r3:eth2", "r4:eth1"]

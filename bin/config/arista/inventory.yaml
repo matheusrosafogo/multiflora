@@ -1,0 +1,41 @@
+# Multiflora — inventário do laboratório "arista" (4 dispositivos Arista cEOS).
+# Rede de gerência: 10.99.0.0/24 (topologia em clab/arista.clab.yaml).
+# As credenciais seguem o padrão do driver arista_ceos (DRIVER_MAP).
+all:
+  hosts:
+    r1:
+      device_type: arista_ceos
+      host: 10.99.0.2
+      port: 22
+      username: admin
+      password: admin
+      auth_secondary: admin
+      hostname: r1
+      config_file: r1.cfg
+    r2:
+      device_type: arista_ceos
+      host: 10.99.0.3
+      port: 22
+      username: admin
+      password: admin
+      auth_secondary: admin
+      hostname: r2
+      config_file: r2.cfg
+    r3:
+      device_type: arista_ceos
+      host: 10.99.0.4
+      port: 22
+      username: admin
+      password: admin
+      auth_secondary: admin
+      hostname: r3
+      config_file: r3.cfg
+    r4:
+      device_type: arista_ceos
+      host: 10.99.0.5
+      port: 22
+      username: admin
+      password: admin
+      auth_secondary: admin
+      hostname: r4
+      config_file: r4.cfg

@@ -1,0 +1,7 @@
+jinja2
+pyyaml
+scrapli[asyncssh]==2024.7.30
+scrapli_community
+pdoc
+nuitka[onefile]
+zstandard

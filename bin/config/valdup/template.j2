@@ -1,0 +1,13 @@
+{# Multiflora — template Arista EOS: gera uma configuração por dispositivo a partir de data.yaml. #}
+hostname {{ hostname }}
+!
+{% for interface in interfaces %}
+interface {{ interface.name }}
+   description {{ interface.description }}
+{% if interface.mode is defined and interface.mode == "routed" %}
+   no switchport
+{% endif %}
+   ip address {{ interface.ip_address }} {{ interface.netmask }}
+   no shutdown
+!
+{% endfor %}

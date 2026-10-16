@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -e
+
+docker build -t multiflora -f .devcontainer/multiflora.Dockerfile . && docker run --rm -it -v "$PWD":"$PWD" -w "$PWD" multiflora bash -c "make onefile LTO=no"
+rm -rf multiflora/gui.build && rm -rf multiflora/gui.dist && rm -rf multiflora/gui.onefile-build
+mkdir -p ~/.local/bin
+mv multiflora/ ~/.local/bin/multiflora-app
+chmod +x ~/.local/bin/multiflora-app/multiflora
+ln -s ~/.local/bin/multiflora-app/multiflora ~/.local/bin/multiflora
+
+if [ "$SHELL" = "/bin/bash" ]; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+elif [ "$SHELL" = "/bin/zsh" ]; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+fi
+
+echo "the application was sucessfully built and is located in the 'multiflora' folder"
+echo "the desktop shortcut was created, and the application was linked to ~/.local/bin/multiflora"
+echo "to open via terminal, reopen your terminal or run 'source ~/.bashrc' or 'source ~/.zshrc'. and then 'multiflora'."

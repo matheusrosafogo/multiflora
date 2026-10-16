@@ -1,0 +1,159 @@
+# Rebuild the pdoc HTML documentation and publish it to GitHub Pages.
+#
+# The documentation is published under the "/docs" route of the Pages URL:
+#   https://<owner>.github.io/<repo>/docs/
+#
+# One-time setup: in the repository settings, set
+#   Settings -> Pages -> Build and deployment -> Source = "GitHub Actions"
+#
+# pdoc generates one standalone site per module (the same layout the Makefile
+# "docs" target produces: <dir>/index.html redirecting to <module>.html), so
+# this workflow also writes a small index page linking every module together.
+
+name: Docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "bin/**"
+      - "docs/**"
+      - "requirements.txt"
+      - ".github/workflows/docs-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build module documentation
+        run: |
+          set -euo pipefail
+
+          # Start from the committed docs: it already holds the README
+          # screenshots (images/) plus the modules that cannot be rebuilt here.
+          mkdir -p site/docs
+          cp -r docs/. site/docs/
+
+          # Rebuild every tracked module in bin/ from source.
+          # bin/gui.py is skipped on purpose: it creates a Tk window and calls
+          # root.mainloop() at import time, so pdoc would hang importing it.
+          while IFS= read -r module; do
+            relative="${module#bin/}"
+            output="site/docs/${relative%.py}"
+            tmp="$(mktemp -d)"
+
+            if timeout 180 pdoc "$module" --output-directory "$tmp/site" \
+               && [ -f "$tmp/site/index.html" ]; then
+              rm -rf "$output"
+              mkdir -p "$(dirname "$output")"
+              cp -r "$tmp/site" "$output"
+              echo "::notice title=pdoc::rebuilt ${module}"
+            else
+              echo "::warning title=pdoc::could not build ${module}, keeping committed docs"
+            fi
+
+            rm -rf "$tmp"
+          done < <(git ls-files bin | grep -E '\.py$' | grep -v '^bin/gui\.py$' | sort)
+
+      - name: Create index page
+        run: |
+          set -euo pipefail
+
+          {
+            cat <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>multiflora API documentation</title>
+          <style>
+            :root { color-scheme: light; }
+            body { max-width: 42rem; margin: 4rem auto; padding: 0 1.25rem; line-height: 1.6;
+                   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #212529; }
+            h1 { font-size: 1.75rem; }
+            li { margin: .35rem 0; }
+            code { background: #f1f3f5; padding: .1rem .3rem; border-radius: .25rem; }
+            a { color: #0d6efd; }
+          </style>
+          </head>
+          <body>
+          <h1>multiflora API documentation</h1>
+          <p>Generated from the sources in <code>bin/</code> with <a href="https://pdoc.dev/">pdoc</a>.</p>
+          <ul>
+          HTML
+
+            find site/docs -mindepth 2 -name index.html \
+              | sed -e 's|^site/docs/||' -e 's|index\.html$||' \
+              | sort \
+              | while IFS= read -r page; do
+                  printf '<li><a href="%s">%s</a></li>\n' "$page" "${page%/}"
+                done
+
+            cat <<'HTML'
+          </ul>
+          </body>
+          </html>
+          HTML
+          } > site/docs/index.html
+
+          # The Pages root simply redirects to the documentation under /docs.
+          cat > site/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <meta http-equiv="refresh" content="0; url=./docs/">
+          <title>multiflora</title>
+          </head>
+          <body><a href="./docs/">multiflora documentation</a></body>
+          </html>
+          HTML
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    name: Deploy docs
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

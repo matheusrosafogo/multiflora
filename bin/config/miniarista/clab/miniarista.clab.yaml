@@ -1,0 +1,25 @@
+# Laboratório Containerlab "miniarista" — 2 x Arista cEOS ligados em fila:
+#   r1 --- r2
+# Os endpoints eth1 do contêiner correspondem a Ethernet1 no EOS, o mesmo nome
+# usado em data.yaml.
+# Deploy a partir do devcontainer: make exec TARGET=miniarista
+name: miniarista
+
+# Rede de gerência própria do laboratório (10.98.0.0/24), a mesma referenciada
+# pelos hosts do inventory.yaml.
+mgmt:
+  network: clab_mgmt_miniarista
+  ipv4-subnet: 10.98.0.0/24
+
+topology:
+  nodes:
+    r1:
+      kind: arista_ceos
+      image: ceos:4.32.0F
+      mgmt-ipv4: 10.98.0.2
+    r2:
+      kind: arista_ceos
+      image: ceos:4.32.0F
+      mgmt-ipv4: 10.98.0.3
+  links:
+    - endpoints: ["r1:eth1", "r2:eth1"]

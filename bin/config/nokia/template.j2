@@ -1,0 +1,10 @@
+{# Multiflora — template Nokia SR Linux (comandos "set"): lê data.yaml e gera uma configuração por dispositivo. #}
+set / system name host-name {{ hostname }}
+{% for interface in interfaces %}
+set / interface {{ interface.name }} admin-state enable
+set / interface {{ interface.name }} description "{{ interface.description }}"
+set / interface {{ interface.name }} subinterface 0 admin-state enable
+set / interface {{ interface.name }} subinterface 0 ipv4 admin-state enable
+set / interface {{ interface.name }} subinterface 0 ipv4 address {{ interface.ip_address }}
+set / network-instance default interface {{ interface.name }}.0
+{% endfor %}

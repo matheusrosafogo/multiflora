@@ -1,0 +1,35 @@
+# Laboratório Containerlab "nokia" — 4 x Nokia SR Linux ligados em fila:
+#   r1 --- r2 --- r3 --- r4
+# Os endpoints ethernet-1/1 e ethernet-1/2 são os mesmos nomes usados em data.yaml.
+# Deploy a partir do devcontainer: make exec TARGET=nokia
+name: nokia
+
+# Rede de gerência própria do laboratório (10.97.0.0/24), a mesma referenciada
+# pelos hosts do inventory.yaml.
+mgmt:
+  network: clab_mgmt_nokia
+  ipv4-subnet: 10.97.0.0/24
+
+topology:
+  nodes:
+    r1:
+      kind: nokia_srlinux
+      image: ghcr.io/nokia/srlinux:26.7.2
+      mgmt-ipv4: 10.97.0.2
+    r2:
+      kind: nokia_srlinux
+      image: ghcr.io/nokia/srlinux:26.7.2
+      mgmt-ipv4: 10.97.0.3
+    r3:
+      kind: nokia_srlinux
+      image: ghcr.io/nokia/srlinux:26.7.2
+      mgmt-ipv4: 10.97.0.4
+    r4:
+      kind: nokia_srlinux
+      image: ghcr.io/nokia/srlinux:26.7.2
+      mgmt-ipv4: 10.97.0.5
+  links:
+    # fila: os nós intermediários usam a segunda interface para o vizinho seguinte
+    - endpoints: ["r1:ethernet-1/1", "r2:ethernet-1/1"]
+    - endpoints: ["r2:ethernet-1/2", "r3:ethernet-1/1"]
+    - endpoints: ["r3:ethernet-1/2", "r4:ethernet-1/1"]

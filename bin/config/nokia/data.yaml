@@ -1,0 +1,51 @@
+# Multiflora — variáveis do template.j2 (um top-level key por dispositivo).
+# Endereçamento do laboratório "nokia" (gerência: 10.97.0.0/24):
+#   lo0 (router-id)..............: 10.97.255.1-4/32
+#   Enlaces P2P (10.97.254.0/24): r1-r2 = .0/30 | r2-r3 = .4/30 | r3-r4 = .8/30
+# No SR Linux os endereços usam prefixo CIDR (ex.: 10.97.255.1/32).
+
+r1:
+  hostname: r1
+  interfaces:
+    - name: lo0
+      description: "Loopback (router-id)"
+      ip_address: 10.97.255.1/32
+    - name: ethernet-1/1
+      description: "P2P para r2 ethernet-1/1"
+      ip_address: 10.97.254.1/30
+
+r2:
+  hostname: r2
+  interfaces:
+    - name: lo0
+      description: "Loopback (router-id)"
+      ip_address: 10.97.255.2/32
+    - name: ethernet-1/1
+      description: "P2P para r1 ethernet-1/1"
+      ip_address: 10.97.254.2/30
+    - name: ethernet-1/2
+      description: "P2P para r3 ethernet-1/1"
+      ip_address: 10.97.254.5/30
+
+r3:
+  hostname: r3
+  interfaces:
+    - name: lo0
+      description: "Loopback (router-id)"
+      ip_address: 10.97.255.3/32
+    - name: ethernet-1/1
+      description: "P2P para r2 ethernet-1/2"
+      ip_address: 10.97.254.6/30
+    - name: ethernet-1/2
+      description: "P2P para r4 ethernet-1/1"
+      ip_address: 10.97.254.9/30
+
+r4:
+  hostname: r4
+  interfaces:
+    - name: lo0
+      description: "Loopback (router-id)"
+      ip_address: 10.97.255.4/32
+    - name: ethernet-1/1
+      description: "P2P para r3 ethernet-1/2"
+      ip_address: 10.97.254.10/30

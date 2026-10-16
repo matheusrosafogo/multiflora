@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.vscode
+.venv/
+.idea/
+clab-*/
+multiflora/
+gui-build/
+gui.dist/
+build/
+/config/
+.autosave_project.json
+.last_project.json

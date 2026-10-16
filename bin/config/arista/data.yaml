@@ -1,0 +1,66 @@
+# Multiflora — variáveis do template.j2 (um top-level key por dispositivo).
+# Endereçamento do laboratório "arista" (gerência: 10.99.0.0/24):
+#   Loopback0 (router-id)......: 10.99.255.1-4/32
+#   Enlaces P2P (10.99.254.0/24): r1-r2 = .0/30 | r2-r3 = .4/30 | r3-r4 = .8/30
+
+r1:
+  hostname: r1
+  interfaces:
+    - name: Loopback0
+      description: "Loopback (router-id)"
+      ip_address: 10.99.255.1
+      netmask: 255.255.255.255
+    - name: Ethernet1
+      description: "P2P para r2 Ethernet1"
+      mode: routed
+      ip_address: 10.99.254.1
+      netmask: 255.255.255.252
+
+r2:
+  hostname: r2
+  interfaces:
+    - name: Loopback0
+      description: "Loopback (router-id)"
+      ip_address: 10.99.255.2
+      netmask: 255.255.255.255
+    - name: Ethernet1
+      description: "P2P para r1 Ethernet1"
+      mode: routed
+      ip_address: 10.99.254.2
+      netmask: 255.255.255.252
+    - name: Ethernet2
+      description: "P2P para r3 Ethernet1"
+      mode: routed
+      ip_address: 10.99.254.5
+      netmask: 255.255.255.252
+
+r3:
+  hostname: r3
+  interfaces:
+    - name: Loopback0
+      description: "Loopback (router-id)"
+      ip_address: 10.99.255.3
+      netmask: 255.255.255.255
+    - name: Ethernet1
+      description: "P2P para r2 Ethernet2"
+      mode: routed
+      ip_address: 10.99.254.6
+      netmask: 255.255.255.252
+    - name: Ethernet2
+      description: "P2P para r4 Ethernet1"
+      mode: routed
+      ip_address: 10.99.254.9
+      netmask: 255.255.255.252
+
+r4:
+  hostname: r4
+  interfaces:
+    - name: Loopback0
+      description: "Loopback (router-id)"
+      ip_address: 10.99.255.4
+      netmask: 255.255.255.255
+    - name: Ethernet1
+      description: "P2P para r3 Ethernet2"
+      mode: routed
+      ip_address: 10.99.254.10
+      netmask: 255.255.255.252

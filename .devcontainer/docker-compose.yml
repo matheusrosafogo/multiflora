@@ -1,0 +1,34 @@
+services:
+  multiflora:
+    build:
+      context: .
+      dockerfile: multiflora.Dockerfile
+    container_name: multiflora
+    pid: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PWD}:${PWD}
+    depends_on:
+      - containerlab
+    environment:
+      - DEBUG=1
+    stdin_open: true
+    tty: true
+    network_mode: host
+
+  containerlab:
+    build:
+      context: .
+      dockerfile: containerlab.Dockerfile
+    container_name: containerlab
+    privileged: true
+    pid: host
+    environment:
+      - DEBUG=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/netns:/var/run/netns:rshared
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /lib/modules:/lib/modules
+      - ${PWD}:${PWD}
+    network_mode: host
